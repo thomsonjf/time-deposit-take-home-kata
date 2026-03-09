@@ -1,17 +1,17 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-app = FastAPI()
+from adapters.api import routes
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the time deposits API"}
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Database setup will go here
+    yield
 
-@app.get("/time-deposits")
-async def get_deposits():
-    return {"message": "Deposits fetched successfully", "data": []}
+app = FastAPI(title="API For TimeDeposits", 
+              description="This API handles listing and updating all deposit items",
+              lifespan=lifespan)
 
-@app.post("/time-deposits")
-async def update_deposits():
-    return {"message": "Deposits Updated"}    
+app.include_router(routes.router, prefix="/time-deposits", tags=["time-deposits"]) 
 
 
