@@ -35,14 +35,14 @@ def get_service(repository: TimeDepositRepository = Depends(get_repository)) -> 
 
 
 # Routes
-@router.get("/deposits", response_model=List[TimeDepositResponse])
+@router.get("/", response_model=List[TimeDepositResponse])
 async def get_deposits(service: TimeDepositService = Depends(get_service)):
     """Get all time deposits"""
     deposits = await service.get_time_deposits()
     return [TimeDepositResponse.model_validate(deposit) for deposit in deposits]
 
 
-@router.put("/deposits/balances", response_model=List[TimeDepositResponse])
+@router.put("/balances", response_model=List[TimeDepositResponse])
 async def update_deposit_balances(service: TimeDepositService = Depends(get_service)):
     """Update all time deposit balances with interest calculation"""
     deposits = await service.update_time_deposits()
