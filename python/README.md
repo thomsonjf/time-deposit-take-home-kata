@@ -118,8 +118,21 @@ uvicorn app.main:app --reload --port 8000
 
 ### Base URL: `/time-deposits`
 
-- **GET /deposits** - Retrieve all time deposits with withdrawals
-- **PUT /time-deposits/balances** - Update all deposit balances with interest
+**GET /** - Retrieve all time deposits with withdrawals
+
+```
+curl -X 'GET' \
+  'http://127.0.0.1:8000/time-deposits/' \
+  -H 'accept: application/json'
+```
+
+**PUT /balances** - Update all deposit balances with interest
+
+```
+curl -X 'PUT' \
+  'http://127.0.0.1:8000/time-deposits/balances' \
+  -H 'accept: application/json'
+```
 
 ### API Documentation
 
