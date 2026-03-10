@@ -2,7 +2,6 @@ from abc import ABC, abstractmethod
 from typing import List, Optional
 from app.domain.models import TimeDeposit, Withdrawal
 
-
 class TimeDepositRepository(ABC):
     """Port for time deposit persistence operations"""
 

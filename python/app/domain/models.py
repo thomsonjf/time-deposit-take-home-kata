@@ -1,5 +1,6 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
+from typing import List, Optional
 
 @dataclass
 class TimeDeposit:
@@ -7,16 +8,18 @@ class TimeDeposit:
     planType: str
     days: int
     balance: float
-    
-    def __init__(self, id, planType, balance, days):
+    withdrawals: List['Withdrawal'] = field(default_factory=list)
+
+    def __init__(self, id, planType, balance, days, withdrawals=None):
         self.id = id
         self.planType = planType
         self.balance = balance
         self.days = days
+        self.withdrawals = withdrawals if withdrawals is not None else []
 
 @dataclass
 class Withdrawal:
-    id: int
+    id: Optional[int]
     timeDepositId: int
     amount: float
     date: datetime

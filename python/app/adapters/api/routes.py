@@ -1,4 +1,5 @@
 from typing import List
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -13,14 +14,23 @@ router = APIRouter()
 
 
 # DTOs (Data Transfer Objects) for API
+class WithdrawalResponse(BaseModel):
+    id: int
+    timeDepositId: int
+    amount: float
+    date: datetime
+
+    model_config = {"from_attributes": True}
+
+
 class TimeDepositResponse(BaseModel):
     id: int
     planType: str
     days: int
     balance: float
+    withdrawals: List[WithdrawalResponse] = []
 
-    class Config:
-        from_attributes = True
+    model_config = {"from_attributes": True}
 
 
 # Dependency injection
@@ -37,13 +47,46 @@ def get_service(repository: TimeDepositRepository = Depends(get_repository)) -> 
 # Routes
 @router.get("/", response_model=List[TimeDepositResponse])
 async def get_deposits(service: TimeDepositService = Depends(get_service)):
-    """Get all time deposits"""
+    """List all time deposits with their withdrawals"""
     deposits = await service.get_time_deposits()
-    return [TimeDepositResponse.model_validate(deposit) for deposit in deposits]
+
+    return [
+        TimeDepositResponse(
+            id=deposit.id,
+            planType=deposit.planType,
+            days=deposit.days,
+            balance=deposit.balance,
+            withdrawals=[
+                WithdrawalResponse(
+                    id=w.id,
+                    timeDepositId=w.timeDepositId,
+                    amount=w.amount,
+                    date=w.date
+                )
+                for w in deposit.withdrawals
+            ]
+        )
+        for deposit in deposits
+    ]
 
 
-@router.put("/balances", response_model=List[TimeDepositResponse])
-async def update_deposit_balances(service: TimeDepositService = Depends(get_service)):
+class UpdateResponse(BaseModel):
+    message: str
+    updated_count: int
+
+
+@router.put("/balances", response_model=UpdateResponse)
+async def update_deposit_balances(
+    service: TimeDepositService = Depends(get_service),
+    session: AsyncSession = Depends(get_db)
+):
     """Update all time deposit balances with interest calculation"""
-    deposits = await service.update_time_deposits()
-    return [TimeDepositResponse.model_validate(deposit) for deposit in deposits]
+    count = await service.update_time_deposits()
+
+    # Commit the transaction
+    await session.commit()
+
+    return UpdateResponse(
+        message="Time deposit balances updated successfully",
+        updated_count=count
+    )
