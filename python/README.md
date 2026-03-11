@@ -5,7 +5,7 @@ A FastAPI-based microservice for managing time deposits with interest calculatio
 The architecture benefits from:
 
 - **Technology independence**: Domain logic doesn't depend on frameworks or databases
-- **Testability**: Easy to test business logic in isolation
+- **Testability**: Easy to test business logic in isolation - a test of services is included
 - **Flexibility**: Can swap database or API framework without touching domain code
 - **Clear dependencies**: Dependencies flow from adapters > application > domain
 
@@ -25,27 +25,7 @@ As per the instructions and business requirements:
 With more time, I would next approach the following:
 
 - Expand the types of test, potentially to include contract testing
-- Revamp the scalability of the update_balances method and test with a larger data set - currently it reads all TimeDeposit records from the database and issues a bulk rewrite. It would benefit from pagination and bulk updates - some notes are in a TODO in `services.py`.
-
-## Architecture
-
-This project follows **Hexagonal Architecture** (Ports & Adapters) to maintain clean separation of concerns:
-
-```
-app/
- domain/              # Business logic (inside the hexagon)
- models.py       # Domain entities
- ports.py        # Repository interfaces (ports)
- application/         # Use cases
- services.py     # Application services
- adapters/            # External integrations (outside the hexagon)
- api/            # Driving adapter (HTTP/FastAPI)
- routes.py
- database/       # Driven adapter (PostgreSQL)
- config.py
- models.py   # SQLAlchemy ORM models
- repositories.py  # Repository implementations
-```
+- Revamp the scalability of the update_balances method and test with a larger data set - currently it reads all TimeDeposit records from the database and issues an update - this isn't efficient. It would benefit from pagination and bulk updates - some notes are in a TODO in `services.py`.
 
 ## Prerequisites
 
